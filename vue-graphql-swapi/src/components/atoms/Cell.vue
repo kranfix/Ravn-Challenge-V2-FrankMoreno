@@ -3,7 +3,7 @@
     <div :style="style">
       <slot></slot>
     </div>
-    
+
     <div v-if="showDivider" :style="{paddingLeft: _padding.left}">
       <hr class="solid">
     </div>
@@ -19,7 +19,6 @@ export default {
     },
     padding: {
       type: Object,
-      default: {},
     },
     textAlign: {
       type: String,
@@ -33,7 +32,7 @@ export default {
         right: '16px',
         top: '16px',
         bottom: '16px',
-        ...this.padding
+        ...(this.padding ?? {})
       }
     },
     style() {
