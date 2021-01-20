@@ -7,7 +7,6 @@ Vue.use(VueApollo)
 Vue.config.productionTip = false
 
 const apolloClient = new ApolloClient({
-  // You should use an absolute URL here
   uri: 'https://swapi-graphql.netlify.app/.netlify/functions/index'
 })
 
