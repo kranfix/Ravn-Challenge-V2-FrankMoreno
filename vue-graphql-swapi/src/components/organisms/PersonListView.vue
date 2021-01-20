@@ -5,10 +5,8 @@
         <person-cell :person="edge.node"/>
       </div>
     </div>
-    <loading-cell/>
-    <noticed-cell/>
-    {{allPeople}}
-    {{$apollo}}
+    <loading-cell v-if="isLoading"/>
+    <noticed-cell v-if="hasError"/>
   </div>
 </template>
 
@@ -22,7 +20,9 @@ import gql from 'graphql-tag'
 const allPeople = gql`
 query AllPeople($first: Int!, $after: String) {
   allPeople(first: $first, after: $after) {
+    __typename
     pageInfo {
+      __typename
       hasNextPage
       hasPreviousPage
       startCursor
@@ -32,13 +32,14 @@ query AllPeople($first: Int!, $after: String) {
     edges {
       cursor
       node {
-        ...PeopleData
+        ...PersonData
       }
     }
   }
 }
 
 fragment PersonData on Person {
+  __typename
   name
   birthYear
   eyeColor
@@ -61,18 +62,9 @@ export default {
   apollo: {
     allPeople: {
       query: allPeople,
-      variables() {
-        if(this.peopleEdges.length == 0){
-          return {
-            fisrt: 5
-          }
-        }
-        const last = this.peopleEdges[this.peopleEdges.length - 1]
-        return {
-          fisrt: 5,
-          after: last.cursor
-        }
-      }
+      variables: {
+        first: 5
+      },
     },
   },
   components: {
@@ -83,37 +75,54 @@ export default {
   data() {
     return {
       allPeople: {},
-      peopleEdges: [
-        {
-          cursor: "someCursor",
-          node: {
-            "name": "Luke Skywalker",
-            "birthYear": "19BBY",
-            "eyeColor": "blue",
-            "hairColor": "blond",
-            "skinColor": "fair",
-            "species": null,
-            "homeworld": {
-              "name": "Tatooine"
-            },
-            "vehicleConnection": {
-              "vehicles": [
-                {
-                  "name": "Snowspeeder"
-                },
-                {
-                  "name": "Imperial Speeder Bike"
-                }
-              ]
-            }
-          }
-        }
-      ]
+      isLoading: true,
+      hasError: false
     }
+  },
+  computed: {
+    peopleEdges() {
+      return this.allPeople?.edges ?? []
+    }
+  },
+  mounted() {
+    setTimeout(() => this.fetchMore(), 1500)
   },
   methods: {
     select(person) {
       this.$emit('selection', person)
+    },
+    async fetchMore() {
+      this.isLoading = true
+      this.hasError = false
+      try {
+        await this.$apollo.queries.allPeople.fetchMore({
+          variables: {
+            first: 5,
+            after: this.allPeople.pageInfo.endCursor,
+          },
+          updateQuery: (previousResult, { fetchMoreResult }) => {
+            return {
+              allPeople: {
+                __typename: fetchMoreResult.allPeople.__typename,
+                pageInfo: {
+                  __typename: previousResult.allPeople.pageInfo.__typename,
+                  ...fetchMoreResult.allPeople.pageInfo,
+                  startCursor: previousResult.allPeople.pageInfo.startCursor
+                },
+                edges: [
+                  ...previousResult.allPeople.edges,
+                  ...fetchMoreResult.allPeople.edges
+                ]
+              },
+            }
+          },
+        })
+        this.isLoading = false
+        this.hasError = false
+      } catch(_) {
+        this.isLoading = false
+      this.hasError = true
+      }
     }
   }
 }
