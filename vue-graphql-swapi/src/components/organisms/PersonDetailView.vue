@@ -20,13 +20,11 @@
 <script>
 import SectionHeader from '../molecules/SectionHeader.vue'
 import DataCell from '../molecules/DataCell.vue'
-import Cell from '../atoms/Cell.vue'
 
 export default {
   components: {
     SectionHeader,
     DataCell,
-    Cell,
   },
   props: {
     person: {
