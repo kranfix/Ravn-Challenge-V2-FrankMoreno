@@ -10,6 +10,8 @@
 <style scoped>
 .row {
   display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .loader {
