@@ -5,9 +5,13 @@
 </template>
 
 <script>
+import Cell from '../atoms/Cell'
 import LoadingIndicator from '../atoms/LoadingIndicator.vue'
 
 export default {
-  components: { LoadingIndicator },
+  components: {
+    Cell,
+    LoadingIndicator
+  },
 }
 </script>

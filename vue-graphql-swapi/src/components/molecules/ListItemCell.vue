@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import Cell from '../atoms/Cell.vue'
+import Cell from '../atoms/Cell'
 
 export default {
   components: {
